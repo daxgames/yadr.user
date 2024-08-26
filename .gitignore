@@ -1,0 +1,4 @@
+gh/hosts.*.yml
+gh/hosts.yml
+*.bak
+
