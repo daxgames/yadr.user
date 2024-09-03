@@ -87,7 +87,7 @@ function link_it() {
     if [[ ! -e "${dest}" ]]; then
       if [[ -d "${source}" ]]; then
         mkdir -p "$(dirname "${dest}")"
-        if [[ $(uname) =~ (MSYS) ]]; then
+        if [[ ${__YADR_OS} == windows ]]; then
           echo "-> Running: rsync -a --update /cygdrive${source} /cygdrive${dest}"
           rsync -a --update "/cygdrive${source}" "/cygdrive${dest}" || exit 1
         else
@@ -95,7 +95,7 @@ function link_it() {
           rsync -a --update "${source}" "${dest}" || exit 1
         fi
       elif [[ -f "${source}" ]]; then
-        if [[ $(uname) =~ (MSYS) ]]; then
+        if [[ ${__YADR_OS} == windows ]]; then
           echo "-> Running: rsync --update /cygdrive${source} /cygdrive${dest}"
           rsync --update "/cygdrive${source}" "/cygdrive${dest}" || exit 1
         else
@@ -111,7 +111,7 @@ function link_it() {
 
   dest_dir="$(dirname "${source}")"
   if [[ ! -d "${dest_dir}" ]] ; then
-    # if  [[ $(uname) == Darwin ]] ; then
+    # if  [[ ${__YADR_OS} == darwin ]] ; then
     #   mkdir "${dest_dir}"
     # else
     #   mkdir -p "${dest_dir}
@@ -189,14 +189,14 @@ function install_rsync() {
         return 1
     fi
 
-    if [[ ! -f "$rsyncHome/rsync.exe" ]] ; then
+    if [[ ! -f "$rsyncHome/rsync.exe" ]] || [[ ! -f "~/bin/rsync.exe" ]]; then
         install_zipped_application \
             "$rsyncHome" \
             "rsync" \
             "https://github.com/rgl/rsync-vagrant/releases/download/v$version/rsync-vagrant-$version.zip" \
             "$sha256sum"
-    else
-        export PATH="$PATH:$rsyncHome"
+        mkdir -p "~/bin"
+        ln -nsf "$rsyncHome/rsync.exe" "~/bin/rsync.exe"
     fi
 }
 
@@ -241,7 +241,7 @@ echo "-> Sourcing '${__YADR_USER_CONFIG}'..."
 source "${__YADR_USER_CONFIG}"
 
 export __YADR_FOLDER_NAME=.yadr
-if [[ $(uname) =~ (MSYS) ]] || [[ $(uname) =~ (MINGW) ]]; then
+if [[ ${__YADR_OS} == windows ]]; then
   export MSYS=winsymlinks:nativestict
   export CYGWIN=winsymlinks:nativestict
 
@@ -284,7 +284,7 @@ else
     echo "YADR User files are up to date."
 fi
 
-if [[ ! $(uname) =~ (MSYS) ]] ; then
+if [[ ! ${__YADR_OS} == windows ]] ; then
   if [[ ! -d ${__YADR_PATH} ]]; then
       echo "Installing YADR..."
       git clone "${__YADR_REPO_URL}" "$HOME/src/dotfiles"
