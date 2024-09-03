@@ -17,12 +17,12 @@ Each configuration file contains a list of user-specific dotfiles that are backe
 
 The user can then version control these dotfiles and sync them across different machines.
 
-Running `install.sh` with the name of the configuration file will backup and link the user-specific dotfiles into a profile folder in this repository with the same name as the configuration file and link them to the user's home directory.
+Running `install.sh personal_linux` will:
 
-1. Back-up the user dotfiles specified in `personal_linux.conf` to the `personal_linux` folder in this repository.
-2. Installs YADR if it's not already installed.
-    - If YADR is installed it will run a YADR update.
-3. Links the user dotfiles from the `home` folder in this repo to the user's `${HOME}` folder.
+1. Back-up the users dotfiles specified in `personal_linux.conf` to the `personal_linux` folder in this repository.
+2. Install YADR from the configured location, if it's not already installed.
+    - If YADR is already installed it will run a YADR update.
+3. Link the user dotfiles from the `personal_linux` folder in this repo to the user's `${HOME}` folder.
 
 `./install.sh personal_linux`, `./install.sh personal_macos`, or `./install.sh personal_windows` would result in the following profile folders being created in this repository:
 
@@ -48,31 +48,41 @@ The user can then version control these dotfiles and sync them across different 
 
 ### Usage
 
-1. Fork this repository. This step is REQUIRED!
-    - Make it private if you want to keep your dotfiles private.
-2. Clone the forked repository to your home directory.
+1. Make a copy of this repository in your GitHub user account. This step is REQUIRED!
+    - _Note: Do not fork this repository directly!_
+    - Clone it, change the remote an push it to a repository you create in GitHub.
+    - Run the following commands, changing `[your user]` to your GitHub user account.:
 
+        ```bash
+        # Authenticate to Github using GH CLI and follow the prompts.
+        gh auth login
+
+        # Clone the repository.
+        git clone https://github.com/daxgames/yadr.user.git ~/.yadr.user
+
+        # Change the remote.
+        git remote set-url origin https://github.com/[your user]/yadr.user.git
+
+        # Create the repository in Github and push the content.
+        gh repo create --private --push [your user]/yadr.user
+        ```
+
+2. Create a copy of `.yadr.user.conf.local.default` called `.yadr.user.conf.local` in the root folder of this repository and modify it to suit your needs.
+3. Create a configuration file, for example `personal_linux.conf`, in the root folder of this repository.
+
+    ```bash
+    source ${MAIN_DIR}/.yadr.user.conf
+    source ${MAIN_DIR}/.yadr.user.files.conf
+
+    # Additional user-specific dotfiles relative to the user's home directory.
+    __YADR_USER_DOTFILES+=(.config/gh/config.yml \
+      .config/bat \
+      .config/gh/hosts.yml \
+      .config/nvim/lua/settings/userplugin-copilot-chat.lua \
+      .config/nvim/plugins/userplugin-copilot-chat.vim \
+      .config/nvim/settings/userplugin-copilot-chat.vim
+    )
     ```
-    git clone https://github.com/[your github org]/yadr.user.git ~/.yadr.user
-    ```
-
-3. Create a copy of `.yadr.user.conf.local.default` called `.yadr.user.conf.local` in the root folder of this repository and modify it to suit your needs.
-4. Create a configuration file, for example `personal_linux.conf`, in the root folder of this repository.
-
-```bash
-source ${MAIN_DIR}/.yadr.user.conf
-source ${MAIN_DIR}/.yadr.user.files.conf
-
-# Additional user-specific dotfiles relative to the user's home directory.
-__YADR_USER_DOTFILES+=(.config/gh/config.yml \
-  .config/bat \
-  .config/gh/hosts.yml \
-  .config/nvim/lua/settings/userplugin-copilot-chat.lua \
-  .config/nvim/plugins/userplugin-copilot-chat.vim \
-  .config/nvim/settings/userplugin-copilot-chat.vim
-)
-
-```
 
 4. Run `./install.sh personal_linux` to backup and/or link the user-specific dotfiles.
 5. Verify the following:
