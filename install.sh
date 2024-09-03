@@ -134,6 +134,72 @@ function link_it() {
   fi
 }
 
+function install_zipped_application() {
+    local destinationPath=$1
+    local name=$2
+    local url=$3
+    local expectedHash=$4
+    local expectedHashAlgorithm=${5:-sha256sum}
+
+    local localZipPath="/tmp/${name}.zip"
+
+    if [[ -z "$(command -v curl)" ]]; then
+        echo "ERROR: curl is not installed."
+        return 1
+    fi
+
+    if [[ -z "$(command -v unzip)" ]]; then
+        echo "ERROR: unzip is not installed."
+        return 1
+    fi
+
+    # Download the file
+    curl -o "$localZipPath" "$url"
+
+    # Calculate the hash
+    local actualHash
+    if [ "$expectedHashAlgorithm" == "sha256sum" ]; then
+        actualHash=$(sha256sum "$localZipPath" | awk '{ print $1 }')
+    else
+        echo "Unsupported hash algorithm: $expectedHashAlgorithm"
+        return 1
+    fi
+
+    # Verify the hash
+    if [ "$actualHash" != "$expectedHash" ]; then
+        echo "$name downloaded from $url to $localZipPath has $actualHash hash that does not match the expected $expectedHash"
+        return 1
+    fi
+
+    # Extract the zip file
+    unzip "$localZipPath" -d "$destinationPath"
+
+    # Remove the zip file
+    rm "$localZipPath"
+}
+
+function install_rsync() {
+    # see https://github.com/rgl/rsync-vagrant/releases
+    version="${1}"
+    rsyncHome="${2}"
+    sha256sum="${3}"
+
+    if [[ -z "$version" ]] || [[ -z "$rsyncHome" ]] || [[ -z "$sha256sum" ]]; then
+        echo "ERROR: RSYNC_VERSION, RSYNC_HOME, and RSYNC_SHA256SUM must be set in the configuration file."
+        return 1
+    fi
+
+    if [[ ! -f "$rsyncHome/rsync.exe" ]] ; then
+        install_zipped_application \
+            "$rsyncHome" \
+            "rsync" \
+            "https://github.com/rgl/rsync-vagrant/releases/download/v$version/rsync-vagrant-$version.zip" \
+            "$sha256sum"
+    else
+        export PATH="$PATH:$rsyncHome"
+    fi
+}
+
 # Usage: ./install.sh <profile folder name> [unlink]
 #
 # Example: ./install.sh personal
@@ -175,9 +241,11 @@ echo "-> Sourcing '${__YADR_USER_CONFIG}'..."
 source "${__YADR_USER_CONFIG}"
 
 export __YADR_FOLDER_NAME=.yadr
-if [[ $(uname) =~ (MSYS) ]] ; then
+if [[ $(uname) =~ (MSYS) ]] || [[ $(uname) =~ (MINGW) ]]; then
   export MSYS=winsymlinks:nativestict
   export CYGWIN=winsymlinks:nativestict
+
+  install_rsync "${__YADR_RSYNC_VERSION}" "${__YADR_USER_RSYNC_HOME}" "${__YADR_RSYNC_SHA256SUM}"
 fi
 
 export __YADR_PATH="$HOME/$__YADR_FOLDER_NAME"
