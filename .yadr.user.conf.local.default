@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# To version control your own dotfiles, fork the `yadr.user` repository and
+# override the following variables in your `.yadr.user.conf.local` file.
+#
+# - At a minimum you should change the `__YADR_USER_GITHUB_ORG` to your github
+#   organization. _Note: Remove the `[]` from the value below._
+export __YADR_USER_GITHUB_ORG=[your github username/orgname]
+
+# Uncomment and set the following variables to modify the repo name and/or branch.
+# export __YADR_USER_REPO_NAME=yadr.user
+# export __YADR_USER_REPO_BRANCH=main

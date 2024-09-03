@@ -239,6 +239,7 @@ __YADR_USER_CONFIG=$(realpath "$1.conf")
 echo "-> Sourcing '${__YADR_USER_CONFIG}'..."
 # shellcheck disable=SC1090
 source "${__YADR_USER_CONFIG}"
+[[ -f "${MAIN_DIR}/.yadr.user.conf.local" ]] && source "${MAIN_DIR}/.yadr.user.conf.local"
 
 export __YADR_FOLDER_NAME=.yadr
 if [[ ${__YADR_OS} == windows ]]; then

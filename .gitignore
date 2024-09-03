@@ -1,4 +1,11 @@
-gh/hosts.*.yml
-gh/hosts.yml
-*.bak
+# Ignore EVERYTHING!
+*
 
+# Except these files
+!.gitignore
+!.yadr.user.conf
+!.yadr.user.files.conf
+!.yadr.user.conf.local.default
+!MIT-LICENSE.txt
+!README.md
+!install.sh
